@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   udp_client_main.c                                  :+:      :+:    :+:   */
+/*   udp_server_main.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lluque <lluque@student.42malaga.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/10 11:17:07 by lluque            #+#    #+#             */
-/*   Updated: 2025/08/10 20:11:18 by lluque           ###   ########.fr       */
+/*   Updated: 2025/08/10 20:12:22 by lluque           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,18 +17,16 @@ int	main(int argc, char **argv)
 	int				sckt;
 	struct addrinfo	*addr_info;
 	struct addrinfo	*addr_info_hints;
-	char			*other_end_address;
-	char			*tx_port;
+	char			*rx_port;
 
-	if (argc != 3)
+	if (argc != 2)
 	{
 		dprintf(STDERR_FILENO,
-				"usage:\n\t%s other_end_address tx_port\n",
+				"usage:\n\t%s rx_port\n",
 				argv[0]);
 		exit (EXIT_FAILURE);
 	}
-	other_end_address = argv[1];
-	tx_port = argv[2];
+	rx_port = argv[1];
 	// This is like the query parameters so the system return only the results
 	// that fit. Fields in 0 are "don't cares".
 	addr_info_hints = calloc(1, sizeof (struct addrinfo));
@@ -37,15 +35,14 @@ int	main(int argc, char **argv)
 	// Notice that it didn't need the ai_protocol.
 
 	// The query to find our address data information. That is, since this
-	// is the client, the node is the other_end_address and the service
-	// is the tx_port.
+	// is the server, the node is NULL and the service is the rx_port.
 	//
 	// The system will reply with a list of address-infos that would allow
-	// to comunicate with the other end from the tx_port in every matching
+	// to respond to comunications that arrive at the rx_port in every matching
 	// AF_INET SOCK_DGRAM protocol on the system. The address info is what's
 	// required to connect or bind a socket.
-	if (getaddrinfo(other_end_address,
-					tx_port,
+	if (getaddrinfo(NULL,
+					rx_port,
 					//NULL, &addr_info))
 					addr_info_hints, &addr_info))
 	{
@@ -71,14 +68,14 @@ int	main(int argc, char **argv)
 			addr_info = addr_info->ai_next;
 			continue ;
 		}
-		if (connect(sckt, addr_info->ai_addr, addr_info->ai_addrlen) != -1)
+		if (bind(sckt, addr_info->ai_addr, addr_info->ai_addrlen) != -1)
 			break ;
 		close(sckt);
 	}
 	if (addr_info == NULL)
 	{
 		dprintf(STDERR_FILENO,
-				"couldn't get address, create a socket or connect to it\n");
+				"couldn't get address, create a socket or bind to it\n");
 		freeaddrinfo(addr_info_hints);
 		close(sckt);
 		exit (EXIT_FAILURE);
@@ -87,31 +84,33 @@ int	main(int argc, char **argv)
 
 	char			buffer[BUFFER_SIZE];
 	int				bc_r;
-	int				bc_w;
+	//int				bc_w;
 
 	buffer[BUFFER_SIZE - 1] = '\0';
 	while (1)
 	{
-		bc_r = read(STDIN_FILENO, buffer, BUFFER_SIZE - 1);
+		bc_r = read(sckt, buffer, BUFFER_SIZE - 1);
 		if (bc_r == -1)
 		{
 			// May be check bc against BUFFER_SIZE and flush?
 			// freee stuff
-			perror("reading from stdin");
+			perror("reading from socket");
 			exit (EXIT_FAILURE);
 		}
-		printf("Something was read from stdin\n");
 		if (bc_r == 0)
 			break ;
-		bc_w = write(sckt, buffer, bc_r);
-		if (bc_w == -1)
-		{
-			// May be check bc against BUFFER_SIZE and flush?
-			// freee stuff
-			perror("writing to socket");
-			exit (EXIT_FAILURE);
-		}
-		printf("Something was written to the socket\n");
+		buffer[bc_r] = '\0';
+
+		printf("Something was read from the socket: %s\n", buffer);
+
+//		bc_w = write(sckt, buffer, bc_r);
+//		if (bc_w == -1)
+//		{
+//			// May be check bc against BUFFER_SIZE and flush?
+//			// freee stuff
+//			perror("writing to socket");
+//			exit (EXIT_FAILURE);
+//		}
 	}
 	printf("Bye!\n");
 

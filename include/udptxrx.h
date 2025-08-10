@@ -6,7 +6,7 @@
 /*   By: lluque <lluque@student.42malaga.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/10 11:16:28 by lluque            #+#    #+#             */
-/*   Updated: 2025/08/10 19:33:39 by lluque           ###   ########.fr       */
+/*   Updated: 2025/08/10 20:00:44 by lluque           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@
 
 
 
-
+void	utr_print_addr_info(struct addrinfo *addr_info);
 
 
 

@@ -6,7 +6,7 @@
 #    By: lluque <lluque@student.42malaga.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 11:23:07 by lluque            #+#    #+#              #
-#    Updated: 2025/08/10 19:29:46 by lluque           ###   ########.fr        #
+#    Updated: 2025/08/10 20:04:09 by lluque           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,6 +24,11 @@ OBJ_DIR = ./obj/
 SRC_DIR = ./src/
 INC_DIR = ./include/
 BIN_DIR = $(BASE_BIN_DIR)
+
+# Project's server directories
+SERVER_SRC_DIR = ./src/
+SERVER_INC_DIR = ./include/
+SERVER_BIN_DIR = $(BASE_BIN_DIR)
 
 # Project's bonus version directories
 BONUS_SRC_DIR = ./src/bonus/
@@ -47,6 +52,8 @@ LIBFT_INC = $(LIBFT_DIR)include/
 #
 # Resulting binary name for mandatory program version (to be placed in BIN_DIR)
 NAME = udp_client
+
+SERVER_NAME = udp_server
 
 # Resulting binary name for bonus program version(to be placed in BONUS_BIN_DIR)
 BONUS_NAME = $(NAME)
@@ -164,6 +171,21 @@ INCLUDES = $(INC_DIR)udptxrx.h \
 
 # List of source code file names with path relative to SRC_DIR
 SOURCES = udp_client_main.c \
+		  utr_print_addr_info.c \
+
+
+SERVER_SOURCES = udp_server_main.c \
+				 utr_print_addr_info.c \
+
+
+SERVER_INCLUDES = $(INC_DIR)udptxrx.h \
+
+
+
+
+
+
+
 
 
 # List of bonus version header file names
@@ -192,6 +214,14 @@ TESTER_SOURCES = tester.c
 #
 # For mandatory version objects
 OBJECTS = $(SOURCES:%.c=$(OBJ_DIR)%.o)
+
+
+
+
+SERVER_OBJECTS = $(SERVER_SOURCES:%.c=$(OBJ_DIR)%.o)
+
+
+
 
 # For bonus version objects
 BONUS_OBJECTS = $(BONUS_SOURCES:%.c=$(OBJ_DIR)%.o)
@@ -263,7 +293,7 @@ NC=\033[0m
 ################################################################################
 
 # Default rule
-all: $(BIN_DIR)$(NAME)
+all: $(BIN_DIR)$(NAME) $(BIN_DIR)$(SERVER_NAME)
 
 ############################# For mandatory version ############################
 
@@ -282,6 +312,27 @@ $(OBJECTS): $(OBJ_DIR)%.o: $(SRC_DIR)%.c $(INCLUDES)
 	@echo
 	@echo ----------------------------------------------------------------------
 
+
+
+
+
+
+# Rule (pattern rule) to individually (no relink) compile objects.
+# See comments at the end of Makefile for details on the syntax.
+$(SERVER_OBJECTS): $(OBJ_DIR)%.o: $(SERVER_SRC_DIR)%.c $(SERVER_INCLUDES)
+	@echo ----------------------------------------------------------------------
+	@echo
+	@echo "              --- ${PURPLE}Compiling objects to ${BPURPLE}$(OBJ_DIR)*.o${NC} ---"
+	mkdir -p $(@D)
+	$(CC) $(CC_FLAGS) $(DEB_FLAGS) -c $< -o $@ -I$(SERVER_INC_DIR)
+	@echo
+	@echo ----------------------------------------------------------------------
+
+
+
+
+
+
 # Rule to link the program
 $(BIN_DIR)$(NAME): $(OBJECTS) $(LIBFT_BIN)
 	@echo ----------------------------------------------------------------------
@@ -295,6 +346,31 @@ $(BIN_DIR)$(NAME): $(OBJECTS) $(LIBFT_BIN)
 ############################### For bonus version ##############################
 # Rule for bonus as phony
 bonus: $(BONUS_BIN_DIR)$(BONUS_NAME)
+
+
+
+
+
+# Rule to link the program
+$(BIN_DIR)$(SERVER_NAME): $(SERVER_OBJECTS) $(LIBFT_BIN)
+	@echo ----------------------------------------------------------------------
+	@echo
+	@echo "          --- ${PURPLE}Linking the program to ${BPURPLE}$(BIN_DIR)$(NAME)${NC} ---"
+	mkdir -p $(@D)
+	$(CC) $(CC_FLAGS) $(DEB_FLAGS) $(SERVER_OBJECTS) $(EXT_LIBS) $(LIBFT_BIN) -o $(BIN_DIR)$(SERVER_NAME)
+	@echo
+	@echo ----------------------------------------------------------------------
+
+
+
+
+############################### For bonus version ##############################
+# Rule for bonus as phony
+bonus: $(BONUS_BIN_DIR)$(BONUS_NAME)
+
+
+
+
 
 # Rule (pattern rule) to individually (no relink) compile BONUS objects
 $(BONUS_OBJECTS): $(OBJ_DIR)%.o: $(BONUS_SRC_DIR)%.c $(BONUS_INCLUDES)
