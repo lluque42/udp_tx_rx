@@ -1,0 +1,8 @@
+bin/
+obj/
+.*
+!.gitignore
+*.o
+*.a
+main.c
+a.out
