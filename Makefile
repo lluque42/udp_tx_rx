@@ -6,7 +6,7 @@
 #    By: lluque <lluque@student.42malaga.com>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 11:23:07 by lluque            #+#    #+#              #
-#    Updated: 2025/08/10 12:27:27 by lluque           ###   ########.fr        #
+#    Updated: 2025/08/10 19:29:46 by lluque           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -46,7 +46,7 @@ LIBFT_INC = $(LIBFT_DIR)include/
 # flags when linking
 #
 # Resulting binary name for mandatory program version (to be placed in BIN_DIR)
-NAME = udp_tx_rx
+NAME = udp_client
 
 # Resulting binary name for bonus program version(to be placed in BONUS_BIN_DIR)
 BONUS_NAME = $(NAME)
@@ -163,7 +163,7 @@ INCLUDES = $(INC_DIR)udptxrx.h \
 
 
 # List of source code file names with path relative to SRC_DIR
-SOURCES = utr_main.c \
+SOURCES = udp_client_main.c \
 
 
 # List of bonus version header file names
@@ -283,12 +283,12 @@ $(OBJECTS): $(OBJ_DIR)%.o: $(SRC_DIR)%.c $(INCLUDES)
 	@echo ----------------------------------------------------------------------
 
 # Rule to link the program
-$(BIN_DIR)$(NAME): $(OBJECTS)
+$(BIN_DIR)$(NAME): $(OBJECTS) $(LIBFT_BIN)
 	@echo ----------------------------------------------------------------------
 	@echo
 	@echo "          --- ${PURPLE}Linking the program to ${BPURPLE}$(BIN_DIR)$(NAME)${NC} ---"
 	mkdir -p $(@D)
-	$(CC) $(CC_FLAGS) $(DEB_FLAGS) $(OBJECTS) $(EXT_LIBS) -o $(BIN_DIR)$(NAME)
+	$(CC) $(CC_FLAGS) $(DEB_FLAGS) $(OBJECTS) $(EXT_LIBS) $(LIBFT_BIN) -o $(BIN_DIR)$(NAME)
 	@echo
 	@echo ----------------------------------------------------------------------
 
