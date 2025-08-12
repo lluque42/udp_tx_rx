@@ -6,7 +6,7 @@
 /*   By: lluque <lluque@student.42malaga.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/10 11:17:07 by lluque            #+#    #+#             */
-/*   Updated: 2025/08/10 20:00:22 by lluque           ###   ########.fr       */
+/*   Updated: 2025/08/12 21:18:48 by lluque           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,3 +37,15 @@ void	utr_print_addr_info(struct addrinfo *addr_info)
 		addr_info = addr_info->ai_next;
 	}
 }
+/*
+struct addrinfo {
+	int              ai_flags;
+	int              ai_family;
+	int              ai_socktype;
+	int              ai_protocol;
+	socklen_t        ai_addrlen;
+	struct sockaddr *ai_addr;
+	char            *ai_canonname;
+	struct addrinfo *ai_next;
+};
+*/

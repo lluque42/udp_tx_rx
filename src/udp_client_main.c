@@ -6,7 +6,7 @@
 /*   By: lluque <lluque@student.42malaga.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/10 11:17:07 by lluque            #+#    #+#             */
-/*   Updated: 2025/08/10 20:11:18 by lluque           ###   ########.fr       */
+/*   Updated: 2025/08/12 21:37:18 by lluque           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,19 @@ int	main(int argc, char **argv)
 			exit (EXIT_FAILURE);
 		}
 		printf("Something was written to the socket\n");
+
+
+		// Change to a recvfrom to get the udp port, see server...
+		bc_r = read(sckt, buffer, BUFFER_SIZE - 1);
+		if (bc_r == -1)
+		{
+			// May be check bc against BUFFER_SIZE and flush?
+			// freee stuff
+			perror("reading from socket");
+			exit (EXIT_FAILURE);
+		}
+		buffer[bc_r] = '\0';
+		printf("This was received back: '%s'\n", buffer);
 	}
 	printf("Bye!\n");
 

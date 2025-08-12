@@ -6,7 +6,7 @@
 /*   By: lluque <lluque@student.42malaga.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/10 11:17:07 by lluque            #+#    #+#             */
-/*   Updated: 2025/08/10 20:12:22 by lluque           ###   ########.fr       */
+/*   Updated: 2025/08/12 21:35:25 by lluque           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,10 @@
 
 int	main(int argc, char **argv)
 {
-	int				sckt;
-	struct addrinfo	*addr_info;
-	struct addrinfo	*addr_info_hints;
-	char			*rx_port;
+	int						sckt;
+	struct addrinfo			*addr_info;
+	struct addrinfo			*addr_info_hints;
+	char					*rx_port;
 
 	if (argc != 2)
 	{
@@ -30,6 +30,10 @@ int	main(int argc, char **argv)
 	// This is like the query parameters so the system return only the results
 	// that fit. Fields in 0 are "don't cares".
 	addr_info_hints = calloc(1, sizeof (struct addrinfo));
+	if (addr_info_hints == NULL)
+	{
+		perror("Calloc'ing");
+	}
 	addr_info_hints->ai_family = AF_INET;					// IPv4
 	addr_info_hints->ai_socktype = SOCK_DGRAM;				// datagram based
 	// Notice that it didn't need the ai_protocol.
@@ -60,6 +64,8 @@ int	main(int argc, char **argv)
 		// and a number given by the system that hopefully refers to UDP.
 		// NOTEL: Said number could be obtained through the getprotobyname()
 		// function (that looks for it in /etc/protocols).
+		printf("The addr_info->ai_family = %d AF_INET = %d\n",
+				addr_info->ai_family, AF_INET);
 		sckt = socket(addr_info->ai_family,
 						addr_info->ai_socktype,
 						addr_info->ai_protocol);
@@ -82,14 +88,24 @@ int	main(int argc, char **argv)
 	}
 
 
-	char			buffer[BUFFER_SIZE];
-	int				bc_r;
-	//int				bc_w;
+	char					buffer[BUFFER_SIZE];
+	int						bc_r;
+	int						bc_w;
+	struct sockaddr_storage	peer_addr;		// For sendto()/recvfrom()
+	socklen_t				peer_addrlen;	// For the above, we need to find
+											// out the actual length
 
 	buffer[BUFFER_SIZE - 1] = '\0';
 	while (1)
 	{
-		bc_r = read(sckt, buffer, BUFFER_SIZE - 1);
+		//bc_r = read(sckt, buffer, BUFFER_SIZE - 1);
+		// The addrlen must be initializaed altough it gets updated
+		// later by recvfrom() with the actual length of the response.
+		// THIS MADE ME LOSE HOURS.
+		peer_addrlen = sizeof (peer_addr);
+		bc_r = recvfrom(sckt, buffer, BUFFER_SIZE - 1,
+						0,	// No flags
+						(struct sockaddr *) &peer_addr, &peer_addrlen);
 		if (bc_r == -1)
 		{
 			// May be check bc against BUFFER_SIZE and flush?
@@ -99,18 +115,44 @@ int	main(int argc, char **argv)
 		}
 		if (bc_r == 0)
 			break ;
+
+//		ft_print_memory(&peer_addr, peer_addrlen);
+		printf("peer_addr->sa_data = %s, peer_addrlen = %d\n",
+				((struct sockaddr *) &peer_addr)->sa_data, peer_addrlen);
 		buffer[bc_r] = '\0';
+		printf("This was read from the socket: %s\n", buffer);
 
-		printf("Something was read from the socket: %s\n", buffer);
+		
+		// The opposite of getaddrinfo() just to retrieve info, I think
+		// this appeared in the getaddrinfo() man page
+		char	host[NI_MAXHOST], service[NI_MAXSERV];
+		int		s;
 
-//		bc_w = write(sckt, buffer, bc_r);
-//		if (bc_w == -1)
-//		{
-//			// May be check bc against BUFFER_SIZE and flush?
-//			// freee stuff
-//			perror("writing to socket");
-//			exit (EXIT_FAILURE);
-//		}
+		s = getnameinfo((struct sockaddr *) &peer_addr,
+			   peer_addrlen, host, NI_MAXHOST,
+			   service, NI_MAXSERV, NI_NUMERICSERV);
+								// NI_NUMERICHOST
+		if (s == 0)
+	  		printf("Received %d bytes from %s:%s\n", bc_r, host, service);
+		else
+			fprintf(stderr, "getnameinfo: %s\n", gai_strerror(s));
+		printf("&peer_addr = %p, peer_addrlen = %d\n",
+				(char *)&peer_addr, peer_addrlen);
+
+
+
+		//bc_w = write(sckt, buffer, bc_r);
+		bc_w = sendto(sckt, buffer, bc_r,
+						0,	// No flags
+						(struct sockaddr *) &peer_addr, peer_addrlen);
+		//if (bc_w == -1)
+		if (bc_w != bc_r)
+		{
+			// May be check bc against BUFFER_SIZE and flush?
+			// freee stuff
+			perror("writing to socket");
+			exit (EXIT_FAILURE);
+		}
 	}
 	printf("Bye!\n");
 
