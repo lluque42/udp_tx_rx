@@ -89,10 +89,11 @@ int	main(int argc, char **argv)
 	int				bc_r;
 	int				bc_w;
 
-	buffer[BUFFER_SIZE - 1] = '\0';
+	//buffer[BUFFER_SIZE - 1] = '\0';
 	while (1)
 	{
-		bc_r = read(STDIN_FILENO, buffer, BUFFER_SIZE - 1);
+		//bc_r = read(STDIN_FILENO, buffer, BUFFER_SIZE - 1);
+		bc_r = read(STDIN_FILENO, buffer, BUFFER_SIZE);
 		if (bc_r == -1)
 		{
 			// May be check bc against BUFFER_SIZE and flush?
@@ -100,10 +101,12 @@ int	main(int argc, char **argv)
 			perror("reading from stdin");
 			exit (EXIT_FAILURE);
 		}
-		printf("Something was read from stdin\n");
+		//printf("Something was read from stdin\n");
 		if (bc_r == 0)
 			break ;
-		bc_w = write(sckt, buffer, bc_r);
+		//bc_w = write(sckt, buffer, bc_r);
+		// Minus 1 to exclude \0
+		bc_w = write(sckt, buffer, bc_r - 1);
 		if (bc_w == -1)
 		{
 			// May be check bc against BUFFER_SIZE and flush?
@@ -111,11 +114,11 @@ int	main(int argc, char **argv)
 			perror("writing to socket");
 			exit (EXIT_FAILURE);
 		}
-		printf("Something was written to the socket\n");
+		//printf("Something was written to the socket\n");
 
 
 		// Change to a recvfrom to get the udp port, see server...
-		bc_r = read(sckt, buffer, BUFFER_SIZE - 1);
+		bc_r = read(sckt, buffer, BUFFER_SIZE);
 		if (bc_r == -1)
 		{
 			// May be check bc against BUFFER_SIZE and flush?
@@ -123,8 +126,13 @@ int	main(int argc, char **argv)
 			perror("reading from socket");
 			exit (EXIT_FAILURE);
 		}
-		buffer[bc_r] = '\0';
-		printf("This was received back: '%s'\n", buffer);
+		if (bc_r < BUFFER_SIZE)
+		{
+			buffer[bc_r] = '\0';
+			printf("This was received back: '%s'\n", buffer);
+		}
+		else
+			printf("Reply was too long, increase BUFFER_SIZE (i'm lazy)\n");
 	}
 	printf("Bye!\n");
 

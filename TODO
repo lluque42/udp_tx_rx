@@ -1,6 +1,10 @@
 ################################################################################
 #### FOR NEXT COMMIT DESCRIPTION ###############################################
 
+Removed the NUL char terminating the message payload.
+The server was binding to 127.0.0.1 instead of the actual ipv4
+address (sudo ss -ulnp).
+
 
 
 ################################################################################
@@ -17,7 +21,10 @@
 ################################################################################
 ### DONE TODO's ################################################################
 
-
+* Something weird happened: After lots of short messages the client got no
+answer and the server exited?
+* Check my chat wit chatgpt, implement both methods: ipv4 vs protocol agnostic
+	* Also assuming several NICS and protocols
 
 ################################################################################
 ################################################################################
